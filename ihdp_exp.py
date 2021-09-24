@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-@author: Milan
+
+The code contains experiments with IHDP dataset
+
 """
 
 #%% Packages
