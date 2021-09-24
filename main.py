@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-@author: Milan
 
 This code contains the implementation of our method on a dummy data set
 
