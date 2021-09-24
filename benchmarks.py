@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-@author: Milan
 
 This code contains the implementation of benchmarks on a dummy data set
 
