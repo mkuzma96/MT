@@ -7,14 +7,11 @@ The code contains experiments with Twins dataset
 
 #%% Packages
 
-import os
 import numpy as np
 import pandas as pd
 from scipy.special import expit
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-
-os.chdir('C:/Users/Milan/Dropbox/MK/ETH PhD Applied Probabilistic AI/projects_long/MT/code_new/')
 
 from main import *
 from benchmarks import *
