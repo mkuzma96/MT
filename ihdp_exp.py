@@ -7,12 +7,9 @@ The code contains experiments with IHDP dataset
 
 #%% Packages
 
-import os
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-
-os.chdir('C:/Users/Milan/Dropbox/MK/ETH PhD Applied Probabilistic AI/projects_long/MT/code_new/')
 
 from main import *
 from benchmarks import *
