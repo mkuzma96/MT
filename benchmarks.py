@@ -786,7 +786,7 @@ def CFRWASS_w(data_train, y_cont, hyperparams):
         else:
             lossY = torch.mean(wm_data[idxT0]*wt_data[idxT0]*Entropy_Y(y0_out[idxT0], y_data[idxT0])) + \
                 torch.mean(wm_data[idxT1]*wt_data[idxT1]*Entropy_Y(y1_out[idxT1], y_data[idxT1])) # For categorical Y
-        n_iter_Wass = 20
+        n_iter_Wass = 10
         n_control = idxT0[0].shape[0]
         n_treated = idxT1[0].shape[0]
         if np.min([n_control,n_treated]) > 0:
