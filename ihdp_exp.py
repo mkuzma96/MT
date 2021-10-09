@@ -76,8 +76,8 @@ hyperparams_list = {
     'layer_size_hypothesis': [50, 100, 200],
     'learn_rate': [0.01, 0.005, 0.001],
     'dropout_rate':  [0, 0.1, 0.2, 0.3],
-    'num_iterations': [10],
-    'batch_size': [100],
+    'num_iterations': [1000, 2000, 3000],
+    'batch_size': [50, 100, 200],
     'alphas': [10**(k/2) for k in np.linspace(-10,6,17)],
     'betas': [10**(k/2) for k in np.linspace(-10,6,17)],
     'gammas': [10**(k/2) for k in np.linspace(-10,6,17)],
@@ -104,8 +104,8 @@ ihdp_results = {
 
 #%% Experiments
 
-n_sims = np.random.choice(n_sim, size=2, replace=False)
-for run in range(2):
+n_sims = np.random.choice(n_sim, size=10, replace=False)
+for run in range(10):
     
     print(run)
     run = n_sims[run]
@@ -159,12 +159,12 @@ for run in range(2):
     
     hyperpar_opt_adv = CV_hyperparam_search(data_train=d_train, data_val=d_val, y_cont=True, 
                                             metric='PEHE', model=MTRNet, model_pred = MTRNet_pred,
-                                            hyperparams_list=hyperparams_list, n_search=2)
+                                            hyperparams_list=hyperparams_list, n_search=100)
     method_adv = MTRNet(data_train=d_train, y_cont=True, hyperparams=hyperpar_opt_adv)
     
     hyperpar_opt_IPM = CV_hyperparam_search(data_train=d_train, data_val=d_val, y_cont=True, 
                                             metric='PEHE', model=MTRNetIPM, model_pred = MTRNetIPM_pred,
-                                            hyperparams_list=hyperparams_list, n_search=2)
+                                            hyperparams_list=hyperparams_list, n_search=100)
     method_IPM = MTRNetIPM(data_train=d_train, y_cont=True, hyperparams=hyperpar_opt_IPM)
     
     # Performance evaluation for method (d_test_ot, d_test_mt, d_test)
@@ -207,32 +207,32 @@ for run in range(2):
     
     hyperpar_opt_del1 = CV_hyperparam_search(data_train=d_train_del, data_val=d_val, y_cont=True, 
                                              metric='PEHE', model=TARNet, model_pred = TARNet_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)    
+                                             hyperparams_list=hyperparams_list, n_search=100)    
     TARNet_del = TARNet(data_train=d_train_del, y_cont=True, hyperparams=hyperpar_opt_del1)
 
     hyperpar_opt_imp1 = CV_hyperparam_search(data_train=d_train_imp, data_val=d_val, y_cont=True, 
                                              metric='PEHE', model=TARNet, model_pred = TARNet_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)    
+                                             hyperparams_list=hyperparams_list, n_search=100)    
     TARNet_imp = TARNet(data_train=d_train_imp, y_cont=True, hyperparams=hyperpar_opt_imp1)
 
     hyperpar_opt_rew1 = CV_hyperparam_search(data_train=d_train_rew, data_val=d_val, y_cont=True, 
                                              metric='PEHE', model=TARNet_w, model_pred = TARNet_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)
+                                             hyperparams_list=hyperparams_list, n_search=100)
     TARNet_rew = TARNet_w(data_train=d_train_rew, y_cont=True, hyperparams=hyperpar_opt_rew1)
     
     hyperpar_opt_del2 = CV_hyperparam_search(data_train=d_train_del, data_val=d_val, y_cont=True, 
                                              metric='PEHE', model=CFRWASS, model_pred=CFRWASS_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)
+                                             hyperparams_list=hyperparams_list, n_search=100)
     CFRWASS_del = CFRWASS(data_train=d_train_del, y_cont=True, hyperparams=hyperpar_opt_del2)
 
     hyperpar_opt_imp2 = CV_hyperparam_search(data_train=d_train_imp, data_val=d_val, y_cont=True, 
                                              metric='PEHE', model=CFRWASS, model_pred=CFRWASS_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)
+                                             hyperparams_list=hyperparams_list, n_search=100)
     CFRWASS_imp = CFRWASS(data_train=d_train_imp, y_cont=True, hyperparams=hyperpar_opt_imp2)
 
     hyperpar_opt_rew2 = CV_hyperparam_search(data_train=d_train_rew, data_val=d_val, y_cont=True, 
                                              metric='PEHE', model=CFRWASS_w, model_pred=CFRWASS_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)
+                                             hyperparams_list=hyperparams_list, n_search=100)
     CFRWASS_rew = CFRWASS_w(data_train=d_train_rew, y_cont=True, hyperparams=hyperpar_opt_rew2)
     
     # Performance evaluation for benchmarks (d_test_ot, d_test_mt, d_test)
