@@ -96,7 +96,7 @@ jobs_results = {
 
 #%% Experiments
 
-n_sims = 2
+n_sims = 10
 for run in range(n_sims):
 
     print(run)
@@ -152,12 +152,12 @@ for run in range(n_sims):
     
     hyperpar_opt_adv = CV_hyperparam_search(data_train=d_train, data_val=d_val, y_cont=False, 
                                             metric='Rpol', model=MTRNet, model_pred=MTRNet_pred,
-                                            hyperparams_list=hyperparams_list, n_search=2)
+                                            hyperparams_list=hyperparams_list, n_search=100)
     method_adv = MTRNet(data_train=d_train, y_cont=False, hyperparams=hyperpar_opt_adv)
     
     hyperpar_opt_IPM = CV_hyperparam_search(data_train=d_train, data_val=d_val, y_cont=False, 
                                             metric='Rpol', model=MTRNetIPM, model_pred=MTRNetIPM_pred,
-                                            hyperparams_list=hyperparams_list, n_search=2)
+                                            hyperparams_list=hyperparams_list, n_search=100)
     method_IPM = MTRNetIPM(data_train=d_train, y_cont=False, hyperparams=hyperpar_opt_IPM)
         
     # Performance evaluation for method (d_test_ot, d_test_mt, d_test)
@@ -200,32 +200,32 @@ for run in range(n_sims):
     
     hyperpar_opt_del1 = CV_hyperparam_search(data_train=d_train_del, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=TARNet, model_pred=TARNet_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)    
+                                             hyperparams_list=hyperparams_list, n_search=100)    
     TARNet_del = TARNet(data_train=d_train_del, y_cont=False, hyperparams=hyperpar_opt_del1)
 
     hyperpar_opt_imp1 = CV_hyperparam_search(data_train=d_train_imp, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=TARNet, model_pred=TARNet_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)    
+                                             hyperparams_list=hyperparams_list, n_search=100)    
     TARNet_imp = TARNet(data_train=d_train_imp, y_cont=False, hyperparams=hyperpar_opt_imp1)
 
     hyperpar_opt_rew1 = CV_hyperparam_search(data_train=d_train_rew, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=TARNet_w, model_pred=TARNet_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)
+                                             hyperparams_list=hyperparams_list, n_search=100)
     TARNet_rew = TARNet_w(data_train=d_train_rew, y_cont=False, hyperparams=hyperpar_opt_rew1)
     
     hyperpar_opt_del2 = CV_hyperparam_search(data_train=d_train_del, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=CFRWASS, model_pred=CFRWASS_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)
+                                             hyperparams_list=hyperparams_list, n_search=100)
     CFRWASS_del = CFRWASS(data_train=d_train_del, y_cont=False, hyperparams=hyperpar_opt_del2)
 
     hyperpar_opt_imp2 = CV_hyperparam_search(data_train=d_train_imp, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=CFRWASS, model_pred=CFRWASS_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)
+                                             hyperparams_list=hyperparams_list, n_search=100)
     CFRWASS_imp = CFRWASS(data_train=d_train_imp, y_cont=False, hyperparams=hyperpar_opt_imp2)
 
     hyperpar_opt_rew2 = CV_hyperparam_search(data_train=d_train_rew, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=CFRWASS_w, model_pred=CFRWASS_pred,
-                                             hyperparams_list=hyperparams_list, n_search=2)
+                                             hyperparams_list=hyperparams_list, n_search=100)
     CFRWASS_rew = CFRWASS_w(data_train=d_train_rew, y_cont=False, hyperparams=hyperpar_opt_rew2)
     
     # Performance evaluation for benchmarks (d_test_ot, d_test_mt, d_test)
