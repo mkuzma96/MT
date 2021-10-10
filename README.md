@@ -6,6 +6,8 @@ main.py (implementation of the proposed method)
 
 benchmarks.py (implementation of benchmark models)
 
+cv_hyper_search.py (hyperparameter search via cross-validation)
+
 ihdp_exp.py (experiments with IHDP dataset)
 
 twins_exp.py (experiments with Twins dataset)
@@ -15,6 +17,8 @@ jobs_exp.py (experiments with Jobs dataset)
 # Method
 
 # Benchmarks
+
+# Hyperparameter search
 
 # IHDP
 
