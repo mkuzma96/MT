@@ -29,11 +29,14 @@ def Rpol(data_test, ITE_est):
     p_f1 = ITE_est > 0
     p_f0 = ITE_est <= 0
     prob_pf1 = np.mean(p_f1) 
-    Rpol = 1 - (np.mean(data_test[(p_f1) & (data_test[:,1]==1), 0])*prob_pf1 +\
-                np.mean(data_test[(p_f0) & (data_test[:,1]==0), 0])*(1-prob_pf1))
-    if np.sum((p_f1) & (data_test[:,1]==1)) == 0:
+    if np.sum((p_f1) & (data_test[:,1]==1)) != 0 and np.sum((p_f0) & (data_test[:,1]==0)) != 0:
+        Rpol = 1 - (np.mean(data_test[(p_f1) & (data_test[:,1]==1), 0])*prob_pf1 +\
+                    np.mean(data_test[(p_f0) & (data_test[:,1]==0), 0])*(1-prob_pf1))
+    if np.sum((p_f1) & (data_test[:,1]==1)) == 0 and np.sum((p_f0) & (data_test[:,1]==0)) == 0:
+        Rpol = 1 
+    if np.sum((p_f1) & (data_test[:,1]==1)) == 0 and np.sum((p_f0) & (data_test[:,1]==0)) != 0:
         Rpol = 1 - np.mean(data_test[(p_f0) & (data_test[:,1]==0), 0])*(1-prob_pf1)
-    if np.sum((p_f0) & (data_test[:,1]==0)) == 0:
+    if np.sum((p_f0) & (data_test[:,1]==0)) == 0 and np.sum((p_f1) & (data_test[:,1]==1)) != 0:
         Rpol = 1 - np.mean(data_test[(p_f1) & (data_test[:,1]==1), 0])*prob_pf1    
     return Rpol
     

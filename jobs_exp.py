@@ -7,10 +7,13 @@ The code contains experiments with Jobs dataset
 
 #%% Packages
 
+import os
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+
+os.chdir('C:/Users/Milan/Dropbox/MK/ETH PhD Applied Probabilistic AI/projects_long/MT/code_run_final/')
 
 from main import *
 from benchmarks import *
@@ -66,32 +69,31 @@ d_nonrand = data[RCT_No:,:]
 hyperparams_list = {
     'layer_size_representation': [50, 100, 200],
     'layer_size_hypothesis': [50, 100, 200],
-    'learn_rate': [0.01, 0.005, 0.001],
+    'learn_rate': [0.005, 0.001, 0.0005],
     'dropout_rate':  [0, 0.1, 0.2, 0.3],
     'num_iterations': [1000, 2000, 3000],
     'batch_size': [50, 100, 200],
     'alphas': [10**(k/2) for k in np.linspace(-10,6,17)],
     'betas': [10**(k/2) for k in np.linspace(-10,6,17)],
     'gammas': [10**(k/2) for k in np.linspace(-10,6,17)],
-    'lambdas': [10**(k/2) for k in np.linspace(-10,6,17)]
+    'lambdas': [0.0005, 0.0001, 0.00005]
     }
 
 # Save results for n_sim runs
 jobs_results = {
-        'MTHD_adv':[[],[],[],[]],
-        'MTHD_IPM':[[],[],[],[]],
+        'MTHD_adv':[[],[],[]],
         'Linear_del':[[],[],[]],
         'Linear_imp':[[],[],[]],
         'Linear_rew':[[],[],[]],
         'CF_del':[[],[],[]],
         'CF_imp':[[],[],[]],
         'CF_rew':[[],[],[]],
-        'TARNet_del':[[],[],[],[]],
-        'TARNet_imp':[[],[],[],[]],
-        'TARNet_rew':[[],[],[],[]],
-        'CFRWASS_del':[[],[],[],[]],
-        'CFRWASS_imp':[[],[],[],[]],
-        'CFRWASS_rew':[[],[],[],[]]
+        'TARNet_del':[[],[],[]],
+        'TARNet_imp':[[],[],[]],
+        'TARNet_rew':[[],[],[]],
+        'CFRWASS_del':[[],[],[]],
+        'CFRWASS_imp':[[],[],[]],
+        'CFRWASS_rew':[[],[],[]]
         }
 
 #%% Experiments
@@ -111,6 +113,7 @@ for run in range(n_sims):
     
     # Deletion method data (delete cases with R=0) -> shape [Y, T, X]
     d_train_del = d_train[(d_train[:,-1] == 1),:-1]
+    d_train_val_del = d_train_val[(d_train_val[:,-1] == 1),:-1]
     
     # Imputation method data (impute according to p(T|X)) -> shape [Y, T, X]
     modelT = LogisticRegression(penalty='l2', solver='lbfgs', max_iter=5000)
@@ -122,12 +125,27 @@ for run in range(n_sims):
         if d_train[i,-1] == 0:
             d_train_imp[i,1] = np.random.choice(a=[0,1], p=[1-p_t[i], p_t[i]])
     
+    modelT = LogisticRegression(penalty='l2', solver='lbfgs', max_iter=5000)
+    modelT.fit(d_train_val_del[:,2:], d_train_val_del[:,1])
+    p_t = modelT.predict_proba(d_train_val[:, 2:-1])[:,1]
+    d_train_val_imp = np.empty(shape=(d_train_val.shape[0],p+2))
+    d_train_val_imp[:,:] = d_train_val[:,:-1]
+    for i in range(d_train_val_imp.shape[0]):
+        if d_train_val[i,-1] == 0:
+            d_train_val_imp[i,1] = np.random.choice(a=[0,1], p=[1-p_t[i], p_t[i]])
+            
     # Reweighting method data (reweight using p(R|X)) -> shape [Y, T, X, w_miss]
     modelR = LogisticRegression(penalty='l2', solver='lbfgs', max_iter=5000)
     modelR.fit(d_train[:,2:-1], d_train[:,-1])
     w_miss = np.empty(shape=d_train_del.shape[0])
     w_miss = 1/modelR.predict_proba(d_train_del[:, 2:])[:,1]
     d_train_rew = np.concatenate((d_train_del, w_miss.reshape(d_train_del.shape[0],1)), axis=1)
+    
+    modelR = LogisticRegression(penalty='l2', solver='lbfgs', max_iter=5000)
+    modelR.fit(d_train_val[:,2:-1], d_train_val[:,-1])
+    w_miss = np.empty(shape=d_train_val_del.shape[0])
+    w_miss = 1/modelR.predict_proba(d_train_val_del[:, 2:])[:,1]
+    d_train_val_rew = np.concatenate((d_train_val_del, w_miss.reshape(d_train_val_del.shape[0],1)), axis=1)
     
     # Splitting test data into observed T and missing T
     d_test_ot = d_test[(d_test[:,-1] == 1),:]
@@ -140,25 +158,23 @@ for run in range(n_sims):
         p_f1 = ITE_est > 0
         p_f0 = ITE_est <= 0
         prob_pf1 = np.mean(p_f1) 
-        Rpol = 1 - (np.mean(data_test[(p_f1) & (data_test[:,1]==1), 0])*prob_pf1 +\
-                    np.mean(data_test[(p_f0) & (data_test[:,1]==0), 0])*(1-prob_pf1))
-        if np.sum((p_f1) & (data_test[:,1]==1)) == 0:
+        if np.sum((p_f1) & (data_test[:,1]==1)) != 0 and np.sum((p_f0) & (data_test[:,1]==0)) != 0:
+            Rpol = 1 - (np.mean(data_test[(p_f1) & (data_test[:,1]==1), 0])*prob_pf1 +\
+                        np.mean(data_test[(p_f0) & (data_test[:,1]==0), 0])*(1-prob_pf1))
+        if np.sum((p_f1) & (data_test[:,1]==1)) == 0 and np.sum((p_f0) & (data_test[:,1]==0)) == 0:
+            Rpol = 1 
+        if np.sum((p_f1) & (data_test[:,1]==1)) == 0 and np.sum((p_f0) & (data_test[:,1]==0)) != 0:
             Rpol = 1 - np.mean(data_test[(p_f0) & (data_test[:,1]==0), 0])*(1-prob_pf1)
-        if np.sum((p_f0) & (data_test[:,1]==0)) == 0:
+        if np.sum((p_f0) & (data_test[:,1]==0)) == 0 and np.sum((p_f1) & (data_test[:,1]==1)) != 0:
             Rpol = 1 - np.mean(data_test[(p_f1) & (data_test[:,1]==1), 0])*prob_pf1    
         return Rpol
-    
+        
     # Implementation of method with ablation - 4 models (d_train2, d_val)
     
     hyperpar_opt_adv = CV_hyperparam_search(data_train=d_train, data_val=d_val, y_cont=False, 
                                             metric='Rpol', model=MTRNet, model_pred=MTRNet_pred,
                                             hyperparams_list=hyperparams_list, n_search=100)
-    method_adv = MTRNet(data_train=d_train, y_cont=False, hyperparams=hyperpar_opt_adv)
-    
-    hyperpar_opt_IPM = CV_hyperparam_search(data_train=d_train, data_val=d_val, y_cont=False, 
-                                            metric='Rpol', model=MTRNetIPM, model_pred=MTRNetIPM_pred,
-                                            hyperparams_list=hyperparams_list, n_search=100)
-    method_IPM = MTRNetIPM(data_train=d_train, y_cont=False, hyperparams=hyperpar_opt_IPM)
+    method_adv = MTRNet(data_train=d_train_val, y_cont=False, hyperparams=hyperpar_opt_adv)
         
     # Performance evaluation for method (d_test_ot, d_test_mt, d_test)
     
@@ -173,60 +189,46 @@ for run in range(n_sims):
     jobs_results['MTHD_adv'][0].append(Rpol_hat_adv)
     jobs_results['MTHD_adv'][1].append(Rpol_hat_adv_ot)
     jobs_results['MTHD_adv'][2].append(Rpol_hat_adv_mt)
-    jobs_results['MTHD_adv'][3].append(hyperpar_opt_adv)    
-    
-    ITE_est_IPM = MTRNetIPM_pred(d_test[:,2:-1], method_IPM, y_cont=False)
-    ITE_est_IPM_ot = MTRNetIPM_pred(d_test_ot[:,2:-1], method_IPM, y_cont=False)
-    ITE_est_IPM_mt = MTRNetIPM_pred(d_test_mt[:,2:-1], method_IPM, y_cont=False)
-    
-    Rpol_hat_IPM = Rpol(d_test, ITE_est_IPM)
-    Rpol_hat_IPM_ot = Rpol(d_test_ot, ITE_est_IPM_ot)
-    Rpol_hat_IPM_mt = Rpol(d_test_mt, ITE_est_IPM_mt)
-    
-    jobs_results['MTHD_IPM'][0].append(Rpol_hat_IPM)
-    jobs_results['MTHD_IPM'][1].append(Rpol_hat_IPM_ot)
-    jobs_results['MTHD_IPM'][2].append(Rpol_hat_IPM_mt)
-    jobs_results['MTHD_IPM'][3].append(hyperpar_opt_IPM) 
     
     # Implementation of benchmarks - 3 * 4 models (d_train_del, d_train_imp, d_train_del + w)
     
-    Linear_del = Linear(d_train_del, y_cont=False)
-    Linear_imp = Linear(d_train_imp, y_cont=False)
-    Linear_rew = Linear_w(d_train_rew, y_cont=False)
+    Linear_del = Linear(d_train_val_del, y_cont=False)
+    Linear_imp = Linear(d_train_val_imp, y_cont=False)
+    Linear_rew = Linear_w(d_train_val_rew, y_cont=False)
     
-    CF_del = CF(d_train_del, y_cont=False)
-    CF_imp = CF(d_train_imp, y_cont=False)
-    CF_rew = CF_w(d_train_rew, y_cont=False)
+    CF_del = CF(d_train_val_del, y_cont=False)
+    CF_imp = CF(d_train_val_imp, y_cont=False)
+    CF_rew = CF_w(d_train_val_rew, y_cont=False)
     
     hyperpar_opt_del1 = CV_hyperparam_search(data_train=d_train_del, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=TARNet, model_pred=TARNet_pred,
                                              hyperparams_list=hyperparams_list, n_search=100)    
-    TARNet_del = TARNet(data_train=d_train_del, y_cont=False, hyperparams=hyperpar_opt_del1)
+    TARNet_del = TARNet(data_train=d_train_val_del, y_cont=False, hyperparams=hyperpar_opt_del1)
 
     hyperpar_opt_imp1 = CV_hyperparam_search(data_train=d_train_imp, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=TARNet, model_pred=TARNet_pred,
                                              hyperparams_list=hyperparams_list, n_search=100)    
-    TARNet_imp = TARNet(data_train=d_train_imp, y_cont=False, hyperparams=hyperpar_opt_imp1)
+    TARNet_imp = TARNet(data_train=d_train_val_imp, y_cont=False, hyperparams=hyperpar_opt_imp1)
 
     hyperpar_opt_rew1 = CV_hyperparam_search(data_train=d_train_rew, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=TARNet_w, model_pred=TARNet_pred,
                                              hyperparams_list=hyperparams_list, n_search=100)
-    TARNet_rew = TARNet_w(data_train=d_train_rew, y_cont=False, hyperparams=hyperpar_opt_rew1)
+    TARNet_rew = TARNet_w(data_train=d_train_val_rew, y_cont=False, hyperparams=hyperpar_opt_rew1)
     
     hyperpar_opt_del2 = CV_hyperparam_search(data_train=d_train_del, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=CFRWASS, model_pred=CFRWASS_pred,
                                              hyperparams_list=hyperparams_list, n_search=100)
-    CFRWASS_del = CFRWASS(data_train=d_train_del, y_cont=False, hyperparams=hyperpar_opt_del2)
+    CFRWASS_del = CFRWASS(data_train=d_train_val_del, y_cont=False, hyperparams=hyperpar_opt_del2)
 
     hyperpar_opt_imp2 = CV_hyperparam_search(data_train=d_train_imp, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=CFRWASS, model_pred=CFRWASS_pred,
                                              hyperparams_list=hyperparams_list, n_search=100)
-    CFRWASS_imp = CFRWASS(data_train=d_train_imp, y_cont=False, hyperparams=hyperpar_opt_imp2)
+    CFRWASS_imp = CFRWASS(data_train=d_train_val_imp, y_cont=False, hyperparams=hyperpar_opt_imp2)
 
     hyperpar_opt_rew2 = CV_hyperparam_search(data_train=d_train_rew, data_val=d_val, y_cont=False, 
                                              metric='Rpol', model=CFRWASS_w, model_pred=CFRWASS_pred,
                                              hyperparams_list=hyperparams_list, n_search=100)
-    CFRWASS_rew = CFRWASS_w(data_train=d_train_rew, y_cont=False, hyperparams=hyperpar_opt_rew2)
+    CFRWASS_rew = CFRWASS_w(data_train=d_train_val_rew, y_cont=False, hyperparams=hyperpar_opt_rew2)
     
     # Performance evaluation for benchmarks (d_test_ot, d_test_mt, d_test)
     
@@ -313,7 +315,6 @@ for run in range(n_sims):
     jobs_results['TARNet_del'][0].append(Rpol_hat_TARNet_del)
     jobs_results['TARNet_del'][1].append(Rpol_hat_TARNet_del_ot)
     jobs_results['TARNet_del'][2].append(Rpol_hat_TARNet_del_mt)
-    jobs_results['TARNet_del'][3].append(hyperpar_opt_del1)
     
     ITE_est_TARNet_imp = TARNet_pred(d_test[:,2:-1], TARNet_imp, y_cont=False)
     ITE_est_TARNet_imp_ot = TARNet_pred(d_test_ot[:,2:-1], TARNet_imp, y_cont=False)
@@ -326,7 +327,6 @@ for run in range(n_sims):
     jobs_results['TARNet_imp'][0].append(Rpol_hat_TARNet_imp)
     jobs_results['TARNet_imp'][1].append(Rpol_hat_TARNet_imp_ot)
     jobs_results['TARNet_imp'][2].append(Rpol_hat_TARNet_imp_mt)
-    jobs_results['TARNet_imp'][3].append(hyperpar_opt_imp1)
     
     ITE_est_TARNet_rew = TARNet_pred(d_test[:,2:-1], TARNet_rew, y_cont=False)
     ITE_est_TARNet_rew_ot = TARNet_pred(d_test_ot[:,2:-1], TARNet_rew, y_cont=False)
@@ -339,7 +339,6 @@ for run in range(n_sims):
     jobs_results['TARNet_rew'][0].append(Rpol_hat_TARNet_rew)
     jobs_results['TARNet_rew'][1].append(Rpol_hat_TARNet_rew_ot)
     jobs_results['TARNet_rew'][2].append(Rpol_hat_TARNet_rew_mt)
-    jobs_results['TARNet_rew'][3].append(hyperpar_opt_rew1)
     
     ITE_est_CFRWASS_del = CFRWASS_pred(d_test[:,2:-1], CFRWASS_del, y_cont=False)
     ITE_est_CFRWASS_del_ot = CFRWASS_pred(d_test_ot[:,2:-1], CFRWASS_del, y_cont=False)
@@ -352,7 +351,6 @@ for run in range(n_sims):
     jobs_results['CFRWASS_del'][0].append(Rpol_hat_CFRWASS_del)
     jobs_results['CFRWASS_del'][1].append(Rpol_hat_CFRWASS_del_ot)
     jobs_results['CFRWASS_del'][2].append(Rpol_hat_CFRWASS_del_mt)
-    jobs_results['CFRWASS_del'][3].append(hyperpar_opt_del2)
     
     ITE_est_CFRWASS_imp = CFRWASS_pred(d_test[:,2:-1], CFRWASS_imp, y_cont=False)
     ITE_est_CFRWASS_imp_ot = CFRWASS_pred(d_test_ot[:,2:-1], CFRWASS_imp, y_cont=False)
@@ -365,7 +363,6 @@ for run in range(n_sims):
     jobs_results['CFRWASS_imp'][0].append(Rpol_hat_CFRWASS_imp)
     jobs_results['CFRWASS_imp'][1].append(Rpol_hat_CFRWASS_imp_ot)
     jobs_results['CFRWASS_imp'][2].append(Rpol_hat_CFRWASS_imp_mt)
-    jobs_results['CFRWASS_imp'][3].append(hyperpar_opt_imp2)
     
     ITE_est_CFRWASS_rew = CFRWASS_pred(d_test[:,2:-1], CFRWASS_rew, y_cont=False)
     ITE_est_CFRWASS_rew_ot = CFRWASS_pred(d_test_ot[:,2:-1], CFRWASS_rew, y_cont=False)
@@ -378,7 +375,6 @@ for run in range(n_sims):
     jobs_results['CFRWASS_rew'][0].append(Rpol_hat_CFRWASS_rew)
     jobs_results['CFRWASS_rew'][1].append(Rpol_hat_CFRWASS_rew_ot)
     jobs_results['CFRWASS_rew'][2].append(Rpol_hat_CFRWASS_rew_mt)
-    jobs_results['CFRWASS_rew'][3].append(hyperpar_opt_rew2)
     
 
 
