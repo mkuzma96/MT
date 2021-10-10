@@ -104,7 +104,7 @@ ihdp_results = {
 #%% Experiments
 
 n_sims = 10
-for run in range(10):
+for run in range(n_sims):
     
     print(run)
     
