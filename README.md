@@ -1,4 +1,4 @@
-# Estimating ITE with missing treatment information
+# Estimating ITE with Missing Treatment Information
 
 This is a repository for the paper "Estimating Individualized Treatment Effects with Missing Treatment Information". The repository includes the following scripts:
 
