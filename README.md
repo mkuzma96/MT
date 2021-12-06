@@ -1,6 +1,6 @@
 # Estimating ITE with missing treatment information
 
-This is a repository for the paper "Estimating individualized treatment effects with missing treatment information". The repository includes the following scripts:
+This is a repository for the paper "Estimating Individualized Treatment Effects with Missing Treatment Information". The repository includes the following scripts:
 
 main.py (implementation of the proposed method)
 
