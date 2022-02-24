@@ -1,6 +1,6 @@
-# Estimating ITE with Missing Treatment Information
+# Estimating CATE with Missing Treatment Information
 
-This is a repository for the research paper "Estimating Individualized Treatment Effects with Missing Treatment Information". The repository includes the following scripts:
+This is a repository for the research paper "Estimating Conditional Average Treatment Effects with Missing Treatment Information". The repository includes the following scripts:
 
 main.py (implementation of the proposed method)
 
