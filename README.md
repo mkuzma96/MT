@@ -16,11 +16,7 @@ jobs_exp.py (experiments with Jobs dataset)
 
 # Benchmarks
 
-# IHDP
-
-# Twins
-
-# Jobs
+# Experiments
 
 # References
 
