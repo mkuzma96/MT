@@ -24,7 +24,7 @@ We conduct experiments with three datasets: IHDP, Twins and Jobs.
 
 For IHDP we use a subset of 10 datasets from 100 simulated datasets provided by Shalit (2017). 
 
-For Twins, we use the original dataset and simulate treatment assignment as in Yoon (2018). For the outcome instead of using survived or died (0-1), we scale the raw outcome by 365 but then use $$Y \in [0,1]$$ representing the 'chance of survival'.
+For Twins, we use the original dataset and simulate treatment assignment as in Yoon (2018). For the outcome instead of using survived or died (0-1), we scale the raw outcome by 365 but then use Y in [0,1] representing the 'chance of survival'.
 
 For Jobs we use the original dataset but modify the 7th covariate which represents the income before treatment. This covariate is heavily right-skewed so we apply the log-transformation. 
 
