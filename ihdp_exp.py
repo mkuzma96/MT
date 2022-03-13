@@ -20,7 +20,7 @@ from benchmarks import *
 #     Treatment: T - binary
 #     Observed covariates: X_vec = [x1, ..., xp] - vector of covariates (p=25)
 
-# This semi-sythetic data comprises of 100 simulated datasets with 747 observations in each: 
+# This semi-sythetic data comprises of 10 simulated datasets with 747 observations in each: 
 # 25 covariates, treatment, outcome
 # -> We know the true ITE used to simulate the dataset and hence use PEHE as evaluation metric.
 
